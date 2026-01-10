@@ -1,5 +1,16 @@
 package simpleautofishing;
 
+
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
+
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import simpleautofishing.mixin.FishingBobberEntityAccessorMixin;
 import net.minecraft.util.Hand;
 import net.minecraft.client.MinecraftClient;
@@ -9,51 +20,144 @@ import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static simpleautofishing.simpleautofishingMode.fishingRod;
-
 public class simpleautofishing implements ClientModInitializer {
-	private MinecraftClient client = MinecraftClient.getInstance();
+	private static MinecraftClient client;
     public static final Logger LOGGER = LoggerFactory.getLogger("simpleautofishing");
-	int delay = 15;
-	boolean extract = true;
+	FishingRodModes FishingRodMode = FishingRodModes.fishingRodUnprotected;
+	int delay = 0;
+	public static int recastDelayTicks = 17;
+	boolean reeledIn, stateAttackKeyReleased = false;
+	enum FishingRodModes {
+		fishingRodUnprotected,
+		fishingRodProtected,
+		allInHotbar;
+
+		public FishingRodModes next() {
+			return values()[(ordinal() + 1) % values().length];
+		}
+	};
 
 	@Override
 	public void onInitializeClient() {
 		LOGGER.info("Registering simpleautofishing!");
-		ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
+		ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
+
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+			dispatcher.register(ClientCommandManager.literal("saf")
+					.then(ClientCommandManager.literal("set")
+							.then(ClientCommandManager.argument("delay", IntegerArgumentType.integer())
+									.executes(context -> {
+										recastDelayTicks = IntegerArgumentType.getInteger(context, "delay");
+										context.getSource().sendFeedback(Text.translatable("text.simpleautofishing.cmd.recastDelayTicks", recastDelayTicks));
+										return 1;
+									})
+							)
+					)
+			);
+		});
 	}
 
-	private void onTick(MinecraftClient client) {
+	private void onTick(MinecraftClient _client) {
+		if (MinecraftClient.getInstance() == null) {
+			return;
+		} else if (MinecraftClient.getInstance() != null && client == null) {
+			client = MinecraftClient.getInstance();
+		}
+
 		if (client.player == null) {
 			return;
 		}
 
-		simpleautofishingMode.ModeChanger();
+		if (!isFishingRodEquipped()) {
+			delay = 0;
+			reeledIn = false;
+			return;
+		}
 
-		if (client.player.fishHook == null && !extract && delay == 15) {
-			UseRod();
-			extract = true;
-		} else if (client.player.fishHook == null && !extract && delay != 15) {
-			delay++;
+		if (client.player.isSneaking() && attackKeyReleased(client.options.attackKey.isPressed())) {
+			FishingRodMode = FishingRodMode.next();
+			if (FishingRodMode == FishingRodModes.fishingRodUnprotected) {
+				client.player.sendMessage(Text.translatable("text.simpleautofishing.safMode.fishing_rod_unprotected"), true);
+			} else if (FishingRodMode == FishingRodModes.fishingRodProtected) {
+				client.player.sendMessage(Text.translatable("text.simpleautofishing.safMode.fishing_rod_protected"), true);
+			} else if (FishingRodMode == FishingRodModes.allInHotbar) {
+				client.player.sendMessage(Text.translatable("text.simpleautofishing.safMode.all_in_hotbar"), true);
+			}
 		}
 
 		if (client.player.fishHook != null && ((FishingBobberEntityAccessorMixin) client.player.fishHook).getCaughtFish()) {
-			UseRod();
+			useRod();
+			reeledIn = true;
 			delay = 0;
-			extract = false;
+		}
+
+		if (!reeledIn) {
+			return;
+		}
+
+		if (delay > recastDelayTicks) {
+			useRod();
+			reeledIn = false;
+			delay = 0;
+		} else {
+			delay++;
 		}
 	}
 
-	public void UseRod() {
-		if (!simpleautofishingMode.modeCheck()) {
-			return;
+	public void useRod() {
+		switch (FishingRodMode) {
+			case FishingRodModes.fishingRodUnprotected:
+				client.player.swingHand(Hand.MAIN_HAND);
+				client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
+				break;
+			case FishingRodModes.fishingRodProtected:
+				if (client.player.getMainHandStack().getDamage() <= client.player.getMainHandStack().getMaxDamage() - 4) {
+					client.player.swingHand(Hand.MAIN_HAND);
+					client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
+				}
+				break;
+			case FishingRodModes.allInHotbar:
+				client.player.swingHand(Hand.MAIN_HAND);
+				client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
+				if (reeledIn) {
+					break;
+				}
+				if (isFishingRodEquipped() && client.player.getMainHandStack().getDamage() + 1 != client.player.getMainHandStack().getMaxDamage()) {
+					break;
+				}
+				int currentSlot = client.player.getInventory().getSelectedSlot();
+				for (int i = 0; i < 9; i++) {
+					if (isFishingRodEquipped(client.player.getInventory().getStack(i)) && currentSlot != i) {
+						client.player.getInventory().setSelectedSlot(i);
+						break;
+					}
+				}
 		}
-		if (client.player.getMainHandStack().isIn(fishingRod)) {
-			client.player.swingHand(Hand.MAIN_HAND);
-			client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
+	}
+
+	public static boolean isFishingRodEquipped() {
+		if (client.getInstance().player.getMainHandStack().isIn(TagKey.of(RegistryKeys.ITEM, Identifier.of("c", "tools/fishing_rod")))) {
+			return true;
+		} else if (client.getInstance().player.getMainHandStack().getItem() == Items.FISHING_ROD) {
+			return true;
 		} else {
-			client.player.swingHand(Hand.OFF_HAND);
-			client.interactionManager.interactItem(client.player, Hand.OFF_HAND);
+			return false;
 		}
+	}
+
+	public static boolean isFishingRodEquipped(ItemStack stack) {
+		if (stack.isIn(TagKey.of(RegistryKeys.ITEM, Identifier.of("c", "tools/fishing_rod")))) {
+			return true;
+		} else if (stack.getItem() == Items.FISHING_ROD) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean attackKeyReleased(boolean currentState) {
+		boolean fallingEdge = stateAttackKeyReleased && !currentState;
+		stateAttackKeyReleased = currentState;
+		return fallingEdge;
 	}
 }
