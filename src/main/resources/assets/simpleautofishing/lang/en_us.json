@@ -1,5 +1,6 @@
 {
   "text.simpleautofishing.safMode.fishing_rod_unprotected": "Use fishing rod (unprotected)",
   "text.simpleautofishing.safMode.fishing_rod_protected": "Use fishing rod (protected)",
-  "text.simpleautofishing.safMode.all_in_hotbar": "Use all fishing rods in hotbar"
+  "text.simpleautofishing.safMode.all_in_hotbar": "Use all fishing rods in hotbar",
+  "text.simpleautofishing.cmd.recastDelayTicks": "Set recast delay to: %d"
 }
