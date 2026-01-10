@@ -10,6 +10,10 @@ A minecraft mod for automatic fishing
 ```
 Change mode:   Sneak + Attack (while fishing rod is equipped in main hand)
 ```
+Starting with Minecraft 1.21.11:
+```
+Change cast delay:   /saf set <delay> (default 17)
+```
 ## Modes:
 ```
 Mode 1 (Default)
@@ -30,7 +34,7 @@ Get it on [modrinth](https://modrinth.com/mod/simple-auto-fishing) or below:
   
 | Minecraft Version  | Forge | NeoForge | Fabric |
 | :----: | :----: | :----: | :----: |
-| 1.21.11  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/forge-v1.6.9/simpleautofishing-1.6.9.jar) | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/neoforge-v1.6.11/simpleautofishing-1.6.11.jar)  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/fabric-v1.6.9/simpleautofishing-1.6.9.jar)  |
+| 1.21.11  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/forge-v1.6.12/simpleautofishing-1.6.12.jar) | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/neoforge-v1.6.12/simpleautofishing-1.6.12.jar)  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/fabric-v1.6.12/simpleautofishing-1.6.12.jar)  |
 | 1.21.10  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/forge-v1.6.9/simpleautofishing-1.6.9.jar) | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/neoforge-v1.6.10/simpleautofishing-1.6.10.jar)  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/fabric-v1.6.9/simpleautofishing-1.6.9.jar)  |
 | 1.21.9  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/forge-v1.6.9/simpleautofishing-1.6.9.jar) | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/neoforge-v1.6.10/simpleautofishing-1.6.10.jar)  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/fabric-v1.6.9/simpleautofishing-1.6.9.jar)  |
 | 1.21.8  | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/forge-v1.6.9/simpleautofishing-1.6.9.jar) | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/neoforge-v1.6.9/simpleautofishing-1.6.9.jar) | [Download](https://github.com/Jan-Marvin/simple-auto-fishing/releases/download/fabric-v1.6.9/simpleautofishing-1.6.9.jar)  |
