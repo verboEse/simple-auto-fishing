@@ -100,7 +100,7 @@ public class simpleautofishing {
 			}
 		}
 
-		if (client.player.fishing != null && ((FishingBobberEntityAccessorMixin) client.player.fishing).getBiting()) {
+		if (client.player.fishing != null && caughtFish(((FishingBobberEntityAccessorMixin) client.player.fishing).getBiting())) {
 			useRod();
 			reeledIn = true;
 			delay = 0;
@@ -174,6 +174,12 @@ public class simpleautofishing {
 		boolean fallingEdge = stateAttackKeyReleased && !currentState;
 		stateAttackKeyReleased = currentState;
 		return fallingEdge;
+	}
+
+	public boolean caughtFish(boolean currentState) {
+		boolean risingEdge = !stateAttackKeyReleased && currentState;
+		stateAttackKeyReleased = currentState;
+		return risingEdge;
 	}
 
 }
