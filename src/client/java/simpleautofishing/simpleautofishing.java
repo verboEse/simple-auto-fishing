@@ -85,7 +85,7 @@ public class simpleautofishing implements ClientModInitializer {
 			}
 		}
 
-		if (client.player.fishHook != null && ((FishingBobberEntityAccessorMixin) client.player.fishHook).getCaughtFish()) {
+		if (client.player.fishHook != null && caughtFish(((FishingBobberEntityAccessorMixin) client.player.fishHook).getCaughtFish())) {
 			useRod();
 			reeledIn = true;
 			delay = 0;
@@ -159,5 +159,11 @@ public class simpleautofishing implements ClientModInitializer {
 		boolean fallingEdge = stateAttackKeyReleased && !currentState;
 		stateAttackKeyReleased = currentState;
 		return fallingEdge;
+	}
+
+	public boolean caughtFish(boolean currentState) {
+		boolean risingEdge = !stateAttackKeyReleased && currentState;
+		stateAttackKeyReleased = currentState;
+		return risingEdge;
 	}
 }
