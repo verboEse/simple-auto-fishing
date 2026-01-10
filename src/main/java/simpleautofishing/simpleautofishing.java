@@ -99,7 +99,7 @@ public class simpleautofishing {
                 client.player.displayClientMessage(Component.translatable("text.simpleautofishing.safMode.all_in_hotbar"), true);
             }
         }
-        if (client.player.fishing != null && ((FishingBobberEntityAccessorMixin) client.player.fishing).getBiting()) {
+        if (client.player.fishing != null && caughtFish(((FishingBobberEntityAccessorMixin) client.player.fishing).getBiting())) {
             useRod();
             reeledIn = true;
             delay = 0;
@@ -174,5 +174,9 @@ public class simpleautofishing {
         stateAttackKeyReleased = currentState;
         return fallingEdge;
     }
-
+    public boolean caughtFish(boolean currentState) {
+        boolean risingEdge = !stateAttackKeyReleased && currentState;
+        stateAttackKeyReleased = currentState;
+        return risingEdge;
+    }
 }
