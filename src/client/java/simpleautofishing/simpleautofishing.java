@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class simpleautofishing implements ClientModInitializer {
 	private static MinecraftClient client;
-    public static final Logger LOGGER = LoggerFactory.getLogger("simpleautofishing");
+	public static final Logger LOGGER = LoggerFactory.getLogger("simpleautofishing");
 	FishingRodModes FishingRodMode = FishingRodModes.fishingRodUnprotected;
 	int delay = 0;
 	public static int recastDelayTicks = 17;
@@ -30,7 +30,8 @@ public class simpleautofishing implements ClientModInitializer {
 	enum FishingRodModes {
 		fishingRodUnprotected,
 		fishingRodProtected,
-		allInHotbar;
+		allInHotbar,
+		allInHotbarProtected;
 
 		public FishingRodModes next() {
 			return values()[(ordinal() + 1) % values().length];
@@ -82,6 +83,8 @@ public class simpleautofishing implements ClientModInitializer {
 				client.player.sendMessage(Text.translatable("text.simpleautofishing.safMode.fishing_rod_protected"), true);
 			} else if (FishingRodMode == FishingRodModes.allInHotbar) {
 				client.player.sendMessage(Text.translatable("text.simpleautofishing.safMode.all_in_hotbar"), true);
+			} else if (FishingRodMode == FishingRodModes.allInHotbarProtected) {
+				client.player.sendMessage(Text.translatable("text.simpleautofishing.safMode.all_in_hotbar_protected"), true);
 			}
 		}
 
@@ -132,6 +135,41 @@ public class simpleautofishing implements ClientModInitializer {
 						break;
 					}
 				}
+			case FishingRodModes.allInHotbarProtected:
+				if (client.player.getMainHandStack().getDamage() > client.player.getMainHandStack().getMaxDamage() - 4) {
+					int currentSlotProtected = client.player.getInventory().getSelectedSlot();
+					boolean switched = false;
+					for (int i = 0; i < 9; i++) {
+						ItemStack stack = client.player.getInventory().getStack(i);
+						if (isFishingRodEquipped(stack) && currentSlotProtected != i
+								&& stack.getDamage() <= stack.getMaxDamage() - 4) {
+							client.player.getInventory().setSelectedSlot(i);
+							switched = true;
+							break;
+						}
+					}
+					if (!switched) {
+						break;
+					}
+				}
+				client.player.swingHand(Hand.MAIN_HAND);
+				client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
+				if (reeledIn) {
+					break;
+				}
+				if (isFishingRodEquipped() && client.player.getMainHandStack().getDamage() + 1 != client.player.getMainHandStack().getMaxDamage()) {
+					break;
+				}
+				int currentSlotSwitch = client.player.getInventory().getSelectedSlot();
+				for (int i = 0; i < 9; i++) {
+					ItemStack stack = client.player.getInventory().getStack(i);
+					if (isFishingRodEquipped(stack) && currentSlotSwitch != i
+							&& stack.getDamage() <= stack.getMaxDamage() - 4) {
+						client.player.getInventory().setSelectedSlot(i);
+						break;
+					}
+				}
+				break;
 		}
 	}
 
