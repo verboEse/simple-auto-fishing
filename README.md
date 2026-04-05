@@ -1,1 +1,2 @@
-﻿# Simple Auto Fishing Forge 1.21.x
+﻿# Simple Auto Fishing Forge 26.x
+

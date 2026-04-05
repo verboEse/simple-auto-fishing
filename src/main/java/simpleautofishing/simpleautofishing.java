@@ -9,7 +9,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import simpleautofishing.mixin.FishingBobberEntityAccessorMixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import com.mojang.logging.LogUtils;
@@ -42,6 +41,7 @@ public class simpleautofishing {
 			return values()[(ordinal() + 1) % values().length];
 		}
 	};
+	private static java.lang.reflect.Field bitingField = null;
 
 	public simpleautofishing(FMLJavaModLoadingContext context) {
 		LOGGER.info("Register simpleautofishing");
@@ -88,19 +88,18 @@ public class simpleautofishing {
 			reeledIn = false;
 			return;
 		}
-
 		if (client.player.isCrouching() && attackKeyReleased(client.options.keyAttack.isDown())) {
 			FishingRodMode = FishingRodMode.next();
 			if (FishingRodMode == FishingRodModes.fishingRodUnprotected) {
-				client.player.displayClientMessage(Component.translatable("text.simpleautofishing.safMode.fishing_rod_unprotected"), true);
+				client.player.sendOverlayMessage(Component.translatable("text.simpleautofishing.safMode.fishing_rod_unprotected"));
 			} else if (FishingRodMode == FishingRodModes.fishingRodProtected) {
-				client.player.displayClientMessage(Component.translatable("text.simpleautofishing.safMode.fishing_rod_protected"), true);
+				client.player.sendOverlayMessage(Component.translatable("text.simpleautofishing.safMode.fishing_rod_protected"));
 			} else if (FishingRodMode == FishingRodModes.allInHotbar) {
-				client.player.displayClientMessage(Component.translatable("text.simpleautofishing.safMode.all_in_hotbar"), true);
+				client.player.sendOverlayMessage(Component.translatable("text.simpleautofishing.safMode.all_in_hotbar"));
 			}
 		}
 
-		if (client.player.fishing != null && caughtFish(((FishingBobberEntityAccessorMixin) client.player.fishing).getBiting())) {
+		if (client.player.fishing != null && caughtFish(isBiting((net.minecraft.world.entity.projectile.FishingHook) client.player.fishing))) {
 			useRod();
 			reeledIn = true;
 			delay = 0;
@@ -180,6 +179,18 @@ public class simpleautofishing {
 		boolean risingEdge = !stateAttackKeyReleased && currentState;
 		stateAttackKeyReleased = currentState;
 		return risingEdge;
+	}
+
+	private static boolean isBiting(net.minecraft.world.entity.projectile.FishingHook hook) {
+		try {
+			if (bitingField == null) {
+				bitingField = net.minecraft.world.entity.projectile.FishingHook.class.getDeclaredField("biting");
+				bitingField.setAccessible(true);
+			}
+			return (boolean) bitingField.get(hook);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }
