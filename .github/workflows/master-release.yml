@@ -133,9 +133,8 @@ jobs:
           jar_path="${RUNNER_TEMP}/${jar_name}"
           cp "$src_jar" "$jar_path"
 
-          short_sha="${GITHUB_SHA::7}"
-          tag_name="${platform}-${plugin_version}-${short_sha}-${GITHUB_RUN_NUMBER}"
-          release_name="${plugin_name} ${minecraft_version} ${plugin_version} (${short_sha})"
+          tag_name="${platform}-v${plugin_version}"
+          release_name="${plugin_name} ${minecraft_version} v${plugin_version}"
 
           {
             echo "jar_name=${jar_name}"
