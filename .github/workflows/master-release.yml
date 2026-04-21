@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: gradle
 
       - name: Build plugin
@@ -34,7 +34,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -x "./gradlew" ]]; then
+          if [[ -f "./gradlew" ]]; then
+            chmod +x ./gradlew
             ./gradlew --no-daemon build
           elif [[ -x "./mvnw" ]]; then
             ./mvnw -B package
