@@ -109,17 +109,17 @@ public class simpleautofishing implements ClientModInitializer {
 	public void useRod() {
 		switch (FishingRodMode) {
 			case FishingRodModes.fishingRodUnprotected:
-				client.player.swing(InteractionHand.MAIN_HAND);
+				swingRod();
 				client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
 				break;
 			case FishingRodModes.fishingRodProtected:
 				if (client.player.getItemInHand(InteractionHand.MAIN_HAND).getDamageValue() <= client.player.getItemInHand(InteractionHand.MAIN_HAND).getMaxDamage() - 4) {
-					client.player.swing(InteractionHand.MAIN_HAND);
+					swingRod();
 					client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
 				}
 				break;
 			case FishingRodModes.allInHotbar:
-				client.player.swing(InteractionHand.MAIN_HAND);
+				swingRod();
 				client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
 				if (reeledIn) {
 					break;
@@ -170,6 +170,20 @@ public class simpleautofishing implements ClientModInitializer {
 				break;
 
 				 */
+		}
+	}
+
+	private void swingRod() {
+		try {
+			Class<?> swingAnimationClass = Class.forName("net.minecraft.world.item.component.SwingAnimation");
+			Object defaultAnimation = swingAnimationClass.getField("DEFAULT").get(null);
+			client.player.getClass()
+					.getMethod("swing", InteractionHand.class, swingAnimationClass, boolean.class)
+					.invoke(client.player, InteractionHand.MAIN_HAND, defaultAnimation, false);
+		} catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException exception) {
+			client.player.swing(InteractionHand.MAIN_HAND);
+		} catch (ReflectiveOperationException exception) {
+			LOGGER.error("Unable to swing fishing rod", exception);
 		}
 	}
 
